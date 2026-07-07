@@ -88,13 +88,12 @@
         
         if (loc.includes('red')) {
             alertBox.style.display = 'block';
-            // Maglagay ng Fire Marker
             if (!fireMarker) {
                 fireMarker = new google.maps.Marker({
                     position: map.getCenter(),
                     map: map,
                     title: "SUNOG ALERT!",
-                    icon: 'https://maps.google.com/mapfiles/ms/icons/firedept.png'
+                    icon: 'https://maps.google.com/mapfiles/ms/icons/fire.png' // Mas reliable na icon link
                 });
             }
         } else {
@@ -107,19 +106,35 @@
     }
 
     function submitData() {
+        const btn = document.querySelector('.btn-submit');
+        btn.disabled = true;
+        btn.innerText = "Submitting...";
+
         var data = {
             emergencyType: document.getElementById('type').value,
             location: document.getElementById('loc').value,
             reporterName: document.getElementById('name').value,
             contactNumber: document.getElementById('contact').value
         };
-        google.script.run.withSuccessHandler(function() {
-            alert("Report Submitted Successfully!");
-            document.getElementById('emergencyForm').reset();
-        }).processForm(data);
+
+        google.script.run
+            .withSuccessHandler(function() {
+                alert("Report Submitted Successfully!");
+                document.getElementById('emergencyForm').reset();
+                btn.disabled = false;
+                btn.innerText = "SUBMIT EMERGENCY REPORT";
+                checkAlert(); // I-reset ang alert box
+            })
+            .withFailureHandler(function(err) {
+                alert("Error: " + err);
+                btn.disabled = false;
+                btn.innerText = "SUBMIT EMERGENCY REPORT";
+            })
+            .processForm(data);
     }
 
     function toggleTheme() { document.body.classList.toggle('light-mode'); }
+    
     setInterval(() => {
         let now = new Date();
         document.getElementById('clock').innerText = now.toLocaleDateString() + ' ' + now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
