@@ -82,9 +82,10 @@
 
     <div id="hotline" class="hotline-container">
         <h2 style="color:var(--gold)">Emergency Hotline</h2>
-        <div class="card"><h3><i class="fas fa-phone"></i> QCDRRMO</h3><p>122 | (02)8928-4333 | 0917-881-9999</p></div>
-        <div class="card"><h3><i class="fas fa-phone"></i> Brgy Claro</h3><p>8-367-1977 | +63-915-217-5472</p></div>
-        <div class="card"><h3><i class="fas fa-phone"></i> BRYGY QUIRINO 3A</h3><p>89115650 | +639064511548</p></div>
+        <div class="card"><h3><i class="fas fa-phone"></i> QCDRRMO</h3><p>122 | (02)8928-4333|(02)8927-5659 | 0917-881-9999</p></div>
+        <div class="card"><h3><i class="fas fa-phone"></i> Brgy Claro</h3><p>8-367-1977 | +63-939-837-35255  |+63-915-217-5472</p></div>
+        <div class="card"><h3><i class="fas fa-phone"></i> BRYGY QUIRINO 3A</h3><p>89115650 | +63-905-413-4207</p></div>
+        <div class="card"><h3><i class="fas fa-phone"></i> BRYGY AMIHAN</h3><p>+63-906-451-1548</p></div>
         <div class="card"><h3><i class="fas fa-phone"></i> Brgy. DUYAN-DUYAN</h3><p>8421-9080 | +639358848937</p></div>
     </div>
 </div>
@@ -120,7 +121,7 @@
         }
     }
 
-    function submitData() {
+  function submitData() {
         const type = document.getElementById('type').value.trim();
         const loc = document.getElementById('loc').value.trim();
         const name = document.getElementById('name').value.trim();
@@ -135,22 +136,31 @@
         btn.disabled = true;
         btn.innerText = "Processing...";
 
-        var data = { emergencyType: type, location: loc, reporterName: name, contactNumber: contact };
-        google.script.run
-            .withSuccessHandler(function() {
-                alert("✅ Report Submitted Successfully!");
-                document.getElementById('emergencyForm').reset();
+        // I-check ang object sa loob ng isang setTimeout para siguradong loaded na ang API
+        setTimeout(function() {
+            if (typeof google !== 'undefined' && google.script) {
+                var data = { emergencyType: type, location: loc, reporterName: name, contactNumber: contact };
+                
+                google.script.run
+                    .withSuccessHandler(function() {
+                        alert("✅ Report Submitted Successfully!");
+                        document.getElementById('emergencyForm').reset();
+                        btn.disabled = false;
+                        btn.innerText = "SUBMIT EMERGENCY REPORT";
+                    })
+                    .withFailureHandler(function(err) {
+                        alert("Error: " + err);
+                        btn.disabled = false;
+                        btn.innerText = "SUBMIT EMERGENCY REPORT";
+                    })
+                    .processForm(data);
+            } else {
+                alert("⚠️ Error: Hindi makakonekta sa Google. Pakisubukang i-refresh ang page (F5).");
                 btn.disabled = false;
                 btn.innerText = "SUBMIT EMERGENCY REPORT";
-            })
-            .withFailureHandler(function(err) {
-                alert("Error: " + err);
-                btn.disabled = false;
-                btn.innerText = "SUBMIT EMERGENCY REPORT";
-            })
-            .processForm(data);
+            }
+        }, 500); // 0.5 segundo na delay para siguradong ready ang Google API
     }
-
     function toggleTheme() { document.body.classList.toggle('light-mode'); }
     
     setInterval(() => {
