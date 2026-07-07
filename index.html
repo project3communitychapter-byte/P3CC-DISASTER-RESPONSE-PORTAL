@@ -76,13 +76,23 @@
         <button type="button" class="btn-submit" onclick="submitData()">SUBMIT EMERGENCY REPORT</button>
     </form>
 
+    <hr style="border: 1px solid var(--gold); margin: 40px 0;">
+
     <div id="hotline" class="hotline-container">
         <h2 style="color:var(--gold)">Emergency Hotline</h2>
         <div class="card"><h3><i class="fas fa-phone"></i> QCDRRMO</h3><p>122 | (02)8928-4333 | 0917-881-9999</p></div>
+        <div class="card"><h3><i class="fas fa-phone"></i> Brgy Claro</h3><p>8-367-1977 | +63-915-217-5472</p></div>
+        <div class="card"><h3><i class="fas fa-phone"></i> BRYGY QUIRINO 3A</h3><p>89115650 | +639064511548</p></div>
+        <div class="card"><h3><i class="fas fa-phone"></i> Brgy. DUYAN-DUYAN</h3><p>8421-9080 | +639358848937</p></div>
     </div>
-    
-    <div id="clock"></div>
 </div>
+
+<footer>
+    <div id="clock"></div>
+    <button onclick="toggleTheme()" style="width: auto; padding: 10px 20px;">Toggle Light/Dark Mode</button>
+    <p style="margin-top:20px; font-style:italic;">"A TRISKELION is a brother unto his fellow TRISKELION."</p>
+    <p>© 2026 P3CC DISASTER PORTAL | System developed by Tol Ron "INSAN" 2026</p>
+</footer>
 
 <script>
     let map, fireMarker;
@@ -139,6 +149,8 @@
             .processForm(data);
     }
 
+    function toggleTheme() { document.body.classList.toggle('light-mode'); }
+    
     // Fixed clock function
     setInterval(() => {
         const clockElement = document.getElementById('clock');
