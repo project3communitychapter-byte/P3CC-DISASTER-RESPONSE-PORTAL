@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <link rel="icon" type="image/jpeg" href="p3cc.png">
     <meta charset="UTF-8">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&callback=initMap" async defer></script>
@@ -48,7 +49,7 @@
         <h2 style="color:var(--gold); text-align: center;">Report Emergency</h2>
         <input type="text" id="type" placeholder="Type of emergency" required>
         <input type="text" id="loc" placeholder="Location" oninput="checkAlert()" required>
-        <div id="alertBox" style="color:#ff0000; font-size: 1.5rem; font-weight:bold; display:none; padding: 10px; text-align: center;">⚠️ RED ALERT: CRITICAL AREA!</div>
+        <div id="alertBox" style="color:#ff0000; font-size: 1.5rem; font-weight:bold; display:none; padding: 10px; text-align: center;">⚠️ RED ALERT: SUNOG!</div>
         <input type="text" id="name" placeholder="Reporter Name" required>
         <input type="text" id="contact" placeholder="Contact number" required>
         <button type="button" class="btn-submit" onclick="submitData()">SUBMIT EMERGENCY REPORT</button>
@@ -73,15 +74,36 @@
 </footer>
 
 <script>
+    let map, fireMarker;
+
     function initMap() {
-        new google.maps.Map(document.getElementById("map"), {
+        map = new google.maps.Map(document.getElementById("map"), {
             center: { lat: 14.6091, lng: 121.0223 }, zoom: 15
         });
     }
 
     function checkAlert() {
         let loc = document.getElementById('loc').value.toLowerCase();
-        document.getElementById('alertBox').style.display = (loc.includes('red')) ? 'block' : 'none';
+        let alertBox = document.getElementById('alertBox');
+        
+        if (loc.includes('red')) {
+            alertBox.style.display = 'block';
+            // Maglagay ng Fire Marker
+            if (!fireMarker) {
+                fireMarker = new google.maps.Marker({
+                    position: map.getCenter(),
+                    map: map,
+                    title: "SUNOG ALERT!",
+                    icon: 'https://maps.google.com/mapfiles/ms/icons/firedept.png'
+                });
+            }
+        } else {
+            alertBox.style.display = 'none';
+            if (fireMarker) {
+                fireMarker.setMap(null);
+                fireMarker = null;
+            }
+        }
     }
 
     function submitData() {
