@@ -10,7 +10,6 @@
         :root { --gold: #d4af37; --black: #050505; --white: #ffffff; }
         
         body { 
-            /* Bagong Professional Background */
             background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('background.png');
             background-size: cover;
             background-position: center;
@@ -47,7 +46,7 @@
         #clock { font-size: 2rem; font-weight: bold; margin-bottom: 10px; color: var(--gold); }
     </style>
 </head>
-<body onload="initMap()">
+<body>
 
 <header>
     <div class="logo-container">
@@ -101,65 +100,63 @@
 <script>
     let map, fireMarker;
 
-    function initMap() {
+    // Initialize Map pag load ng page
+    document.addEventListener("DOMContentLoaded", function() {
         map = L.map('map').setView([14.6091, 121.0223], 15);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
-    }
+    });
 
     function checkAlert() {
         let loc = document.getElementById('loc').value.toLowerCase();
         let alertBox = document.getElementById('alertBox');
         if (loc.includes('red')) {
             alertBox.style.display = 'block';
-            if (!fireMarker) {
+            if (map && !fireMarker) {
                 fireMarker = L.marker([14.6091, 121.0223]).addTo(map).bindPopup("SUNOG ALERT!").openPopup();
             }
         } else {
             alertBox.style.display = 'none';
-            if (fireMarker) { map.removeLayer(fireMarker); fireMarker = null; }
+            if (map && fireMarker) { map.removeLayer(fireMarker); fireMarker = null; }
         }
     }
 
- function submitData() {
-    const type = document.getElementById('type').value.trim();
-    const loc = document.getElementById('loc').value.trim();
-    const name = document.getElementById('name').value.trim();
-    const contact = document.getElementById('contact').value.trim();
+    function submitData() {
+        const type = document.getElementById('type').value.trim();
+        const loc = document.getElementById('loc').value.trim();
+        const name = document.getElementById('name').value.trim();
+        const contact = document.getElementById('contact').value.trim();
 
-    if (!type || !loc || !name || !contact) {
-        alert("⚠️ BABALA: Pakipunan ang lahat ng field.");
-        return;
+        if (!type || !loc || !name || !contact) {
+            alert("⚠️ BABALA: Pakipunan ang lahat ng field.");
+            return;
+        }
+
+        const btn = document.querySelector('.btn-submit');
+        btn.disabled = true;
+        btn.innerText = "Processing...";
+
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbwqnbJBdfNOf3VmN-vUjtRBI-paugi6BnHdCOh6RCXmz80cxw6Oq7sn79GaqUy2LAwj/exec';
+
+        fetch(scriptURL, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: JSON.stringify({ emergencyType: type, location: loc, reporterName: name, contactNumber: contact })
+        })
+        .then(() => {
+            alert("✅ Report Submitted Successfully!");
+            document.getElementById('emergencyForm').reset();
+            btn.disabled = false;
+            btn.innerText = "SUBMIT EMERGENCY REPORT";
+        })
+        .catch(err => {
+            alert("Error: " + err);
+            btn.disabled = false;
+            btn.innerText = "SUBMIT EMERGENCY REPORT";
+        });
     }
 
-    const btn = document.querySelector('.btn-submit');
-    btn.disabled = true;
-    btn.innerText = "Processing...";
-
-    // I-replace ang URL na ito ng URL ng iyong Web App (yung may /exec sa dulo)
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbwqnbJBdfNOf3VmN-vUjtRBI-paugi6BnHdCOh6RCXmz80cxw6Oq7sn79GaqUy2LAwj/exec';
-
-    fetch(scriptURL, {
-        method: 'POST',
-        mode: 'no-cors',
-        body: JSON.stringify({ emergencyType: type, location: loc, reporterName: name, contactNumber: contact })
-    })
-    .then(() => {
-        alert("✅ Report Submitted Successfully!");
-        document.getElementById('emergencyForm').reset();
-        btn.disabled = false;
-        btn.innerText = "SUBMIT EMERGENCY REPORT";
-    })
-    .catch(err => {
-        alert("Error: " + err);
-        btn.disabled = false;
-        btn.innerText = "SUBMIT EMERGENCY REPORT";
-    });
-}
-            }
-        }, 500); // 0.5 segundo na delay para siguradong ready ang Google API
-    }
     function toggleTheme() { document.body.classList.toggle('light-mode'); }
     
     setInterval(() => {
