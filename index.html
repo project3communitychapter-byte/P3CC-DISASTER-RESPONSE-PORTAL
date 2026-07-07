@@ -108,20 +108,53 @@
         }).addTo(map);
     });
 
-    function checkAlert() {
-        let loc = document.getElementById('loc').value.toLowerCase();
-        let alertBox = document.getElementById('alertBox');
-        if (loc.includes('red')) {
-            alertBox.style.display = 'block';
-            if (map && !fireMarker) {
-                fireMarker = L.marker([14.6091, 121.0223]).addTo(map).bindPopup("SUNOG ALERT!").openPopup();
-            }
-        } else {
-            alertBox.style.display = 'none';
-            if (map && fireMarker) { map.removeLayer(fireMarker); fireMarker = null; }
-        }
-    }
+    let timeout = null;
 
+    function checkAlert() {
+        clearTimeout(timeout);
+        // Maghihintay ng 1 segundo matapos mag-type ang user para hindi ma-spam ang API
+        timeout = setTimeout(async function() {
+            let locName = document.getElementById('loc').value;
+            let alertBox = document.getElementById('alertBox');
+            
+            // Kung maikli ang input, huwag mag-search
+            if (!locName || locName.length < 3) {
+                alertBox.style.display = 'none';
+                if (map && fireMarker) { map.removeLayer(fireMarker); fireMarker = null; }
+                return;
+            }
+
+            try {
+                // Gamit ang Nominatim API para hanapin ang coordinates ng lugar
+                const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(locName)}`);
+                const data = await response.json();
+
+                if (data.length > 0) {
+                    const lat = data[0].lat;
+                    const lon = data[0].lon;
+
+                    // I-center ang map sa nahanap na location
+                    map.setView([lat, lon], 16);
+
+                    // I-update ang UI para sa Red Alert
+                    alertBox.style.display = 'block';
+                    alertBox.innerHTML = `⚠️ RED ALERT: ${document.getElementById('type').value.toUpperCase()} sa ${data[0].display_name.split(',')[0]}`;
+
+                    // I-update ang Red Marker
+                    if (fireMarker) map.removeLayer(fireMarker);
+                    
+                    fireMarker = L.marker([lat, lon], {
+                        icon: L.divIcon({
+                            className: 'red-alert-marker',
+                            html: '<div style="background-color: red; width: 25px; height: 25px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 10px red;"></div>'
+                        })
+                    }).addTo(map).bindPopup("🚨 EMERGENCY ALERT DITO!").openPopup();
+                }
+            } catch (err) {
+                console.error("Geocoding Error: ", err);
+            }
+        }, 1000); 
+    }
     function submitData() {
         const type = document.getElementById('type').value.trim();
         const loc = document.getElementById('loc').value.trim();
