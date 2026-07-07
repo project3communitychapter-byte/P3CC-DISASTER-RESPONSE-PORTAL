@@ -1,13 +1,23 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <link rel="icon" type="image/jpeg" href="p3cc.png">
     <meta charset="UTF-8">
+    <link rel="icon" type="image/jpeg" href="p3cc.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&callback=initMap" async defer></script>
     <style>
-        :root { --gold: #d4af37; --black: #0a0a0a; --white: #ffffff; }
-        body { background: var(--black); color: var(--white); font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; transition: 0.3s; }
+        :root { 
+            --gold: #d4af37; 
+            --black: #050505; 
+            --dark-grey: #1a1a1a;
+            --white: #ffffff; 
+        }
+        body { 
+            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%); 
+            color: var(--white); 
+            font-family: 'Segoe UI', sans-serif; 
+            margin: 0; padding: 20px; 
+        }
         .light-mode { background: #e0e0e0; color: var(--black); }
         
         header { text-align: center; padding: 30px; border-bottom: 3px solid var(--gold); }
@@ -18,10 +28,14 @@
         .container { max-width: 800px; margin: auto; padding: 20px; }
         #map { width: 100%; height: 400px; background: #222; border: 3px solid var(--gold); border-radius: 15px; margin-bottom: 30px; }
 
-        input, button { width: 100%; padding: 20px; margin: 10px 0; border-radius: 10px; font-size: 1.2rem; box-sizing: border-box; }
-        .card { background: #1a1a1a; border-left: 5px solid var(--gold); padding: 25px; margin: 20px 0; border-radius: 0 15px 15px 0; text-align: center; }
-        .btn-submit { background: var(--gold); color: black; font-weight: bold; border: none; cursor: pointer; }
+        input { width: 100%; padding: 20px; margin: 10px 0; border-radius: 10px; font-size: 1.2rem; box-sizing: border-box; background: #111; border: 1px solid #333; color: white; }
+        input:focus { border-color: var(--gold); outline: none; }
         
+        .btn-submit { width: 100%; padding: 20px; margin: 10px 0; border-radius: 10px; font-size: 1.2rem; background: var(--gold); color: black; font-weight: bold; border: none; cursor: pointer; transition: 0.3s; }
+        .btn-submit:hover { opacity: 0.9; transform: scale(1.01); }
+        .btn-submit:disabled { background: #444; cursor: not-allowed; }
+
+        .card { background: var(--dark-grey); border-left: 5px solid var(--gold); padding: 25px; margin: 20px 0; border-radius: 0 15px 15px 0; text-align: center; }
         .hotline-container { display: flex; flex-direction: column; align-items: center; }
         .card { width: 90%; }
 
@@ -93,7 +107,7 @@
                     position: map.getCenter(),
                     map: map,
                     title: "SUNOG ALERT!",
-                    icon: 'https://maps.google.com/mapfiles/ms/icons/fire.png' // Mas reliable na icon link
+                    icon: 'http://maps.google.com/mapfiles/ms/icons/fire-dept.png'
                 });
             }
         } else {
@@ -106,24 +120,29 @@
     }
 
     function submitData() {
+        const type = document.getElementById('type').value.trim();
+        const loc = document.getElementById('loc').value.trim();
+        const name = document.getElementById('name').value.trim();
+        const contact = document.getElementById('contact').value.trim();
+
+        if (!type || !loc || !name || !contact) {
+            alert("⚠️ BABALA: Pakipunan ang lahat ng field bago mag-submit.");
+            return;
+        }
+
         const btn = document.querySelector('.btn-submit');
         btn.disabled = true;
-        btn.innerText = "Submitting...";
+        btn.innerText = "Processing...";
 
-        var data = {
-            emergencyType: document.getElementById('type').value,
-            location: document.getElementById('loc').value,
-            reporterName: document.getElementById('name').value,
-            contactNumber: document.getElementById('contact').value
-        };
+        var data = { emergencyType: type, location: loc, reporterName: name, contactNumber: contact };
 
         google.script.run
             .withSuccessHandler(function() {
-                alert("Report Submitted Successfully!");
+                alert("✅ Report Submitted Successfully!");
                 document.getElementById('emergencyForm').reset();
+                checkAlert();
                 btn.disabled = false;
                 btn.innerText = "SUBMIT EMERGENCY REPORT";
-                checkAlert(); // I-reset ang alert box
             })
             .withFailureHandler(function(err) {
                 alert("Error: " + err);
@@ -134,10 +153,8 @@
     }
 
     function toggleTheme() { document.body.classList.toggle('light-mode'); }
-    
     setInterval(() => {
-        let now = new Date();
-        document.getElementById('clock').innerText = now.toLocaleDateString() + ' ' + now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        document.getElementById('clock').innerText = new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     }, 1000);
 </script>
 </body>
